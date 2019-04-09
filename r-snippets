@@ -1,0 +1,137 @@
+snippet parallel_processing_setup
+	workers <- makeCluster(detectCores(), type = "SOCK")
+	registerDoParallel(workers)
+
+snippet corrplot
+	corrplot(cor(data), method = "color", tl.col = "white")
+
+snippet missing_columnsS
+	data %>%
+	gather(col, value) %>%
+	group_by(col) %>%
+	summarize(missing_share = mean(is.na(value))) %>%
+	arrange(desc(missing_share))
+
+snippet correl
+	psych::pairs.panels(${1:data}, 
+		method = "pearson",
+		hist.col = "#00AFBB",
+		density = T,
+		ellipses = F,
+		smooth = F)
+
+snippet loop_output_rbind
+	plyr::rbind.fill(listOfDataFrames)
+
+snippet bar_plot
+	ggplotly(
+	ggplot(data, aes(x = fct_reorder(browser, users, .desc = F), y = user_percent, label = users)) +
+		geom_bar(stat = "identity") +
+		ggtitle("Title") +
+		coord_flip() +
+		ylab("% of Total Users") +
+		xlab("")
+, tooltip = c("y","label"))
+
+snippet ga_extended_pull
+	ga_dimensions <- c("Date", "deviceCategory")
+
+	${1:ga_data} <- google_analytics(ga_id, 
+	date_range = c(date_start, date_end), 
+	dimensions = ga_dimensions,
+	metrics = c("pageviews"),
+	dim_filters = ,
+	segments = ,
+	anti_sample = TRUE)
+	#anti_sample_batches = 3
+
+	${1:ga_data}[,"Date"] <- ymd(${1:ga_data}[,"Date"])
+	ga_data_list <- vector("list", length(ga_dimensions))
+	names(ga_data_list) <- ga_dimensions
+
+	for (i in ga_dimensions) {
+	ga_data_list[[i]] <- unique(${1:ga_data}[,i]) 
+	}
+
+	template_df <- expand.grid(ga_data_list)
+	${1:ga_data} <- left_join(template_df, ${1:ga_data})
+
+snippet timeseries
+	ts(${1:Data}[,2], start = c(1, 1), frequency = ${2:7})
+
+
+snippet date_range
+	seq(as.Date(${1:date_start}), as.Date(${2:date_end}), by="days")
+
+snippet keygen
+	expand.grid(colname_1 = vector_1, colname_2 = vector_2) %>% mutate(key = paste0(colname_1, colname_2))
+
+snippet dbquery
+	dbGetQuery(con, "${1:SQL query}")
+
+snippet dbconnect
+	library(odbc)
+	library(DBI)
+	con <- dbConnect(odbc::odbc(), 
+		.connection_string = "driver={SQL Server};server=PRDDC1RDBSQL006;database=impresario; trusted_connection= true",
+		encoding = "windows-1252")
+
+snippet segment_new_ga
+	se_1 <- segment_element("productCategory",
+		operator = "EXACT",
+		type = "DIMENSION",
+		expressions = "performance")
+
+	sv_simple <- segment_vector_simple(list(list(se_1)))
+	seg_defined_one <- segment_define(sv_simple)
+	segment4 <- segment_ga4("simple", user_segment = seg_defined_one)
+
+snippet segment_existing_ga 
+	segment_ga4(name = "${1:Name}", segment_id = "${2:ID}")
+
+snippet gapull
+	google_analytics(ga_id, 
+		date_range = c(date_start, date_end), 
+		dimensions = c("${1:Date}"),
+		metrics = c("${2:pageviews}"),
+		dim_filters = ,
+		segments = ,
+		anti_sample = TRUE)
+		#anti_sample_batches = 3
+		#ga_data\$Date <- ymd(ga_data\$Date)
+
+snippet dim_filter
+	dim_filter("${1:dimension}", "${2:EXACT}", "${3:condition}")
+
+snippet gafilter
+	filter_clause_ga4(list(${1:dim_filter}), operator = "OR")
+
+snippet gaload
+	# Load GA
+	googleAuthR::gar_auth(".httr-oauth")
+	account_list <- ga_account_list()
+	ga_id <- account_list[4, 'viewId']
+	date_start <- ${1:Sys.Date() - 7}
+	date_end <- ${2:Sys.Date() - 1}
+
+snippet title_center
+	theme_update(plot.title = element_text(hjust = 0.5))
+	
+snippet title_left
+	theme_set(theme_gray())
+
+snippet code_chunk_aspect_ratio
+	knitr::opts_chunk\$set(echo=FALSE, fig.width=8, fig.height=5)
+	theme_update(plot.title = element_text(hjust = 0.5))
+	
+snippet ggplotly
+	ggplotly(
+	ggplot(${1:data}, aes(x = ${2:column}, y = ${3:column})) +
+		geom_${4:geom}() +
+		ggtitle("${5:Title}")
+	)
+
+snippet ggplot
+	ggplot(${1:data}, aes(x = ${2:column}, y = ${3:column})) +
+		geom_${4:geom}() +
+		ggtitle("${5:Title}")
